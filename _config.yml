@@ -14,9 +14,9 @@ timezone: Asia/Seoul
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: slowstarter # the main title
+title: Castaway # the main title
 
-tagline: Stop a moment and take a rest # it will display as the sub-title
+tagline: question & Answer # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   just record for me.
