@@ -6,6 +6,7 @@ categories: [Record, jungle]
 tags: 
 render_with_liquid: false
 ---
+카이정글에서 첫번째 회고
 
 ## 드는생각
 
