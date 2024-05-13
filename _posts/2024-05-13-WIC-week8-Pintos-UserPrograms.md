@@ -158,7 +158,7 @@ os에 대한 이해 없이, userprog에 작동과정에 대한 이해 없이, �
 
 [완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall/userprog/process.c#L194) (팀원분이 작성해주셨습니다.)
 
-user program이 시작하기전 user stack에 data를 적재하는 과정입니다. 즉 unix에서 파일 실행 명령어를 칠때, file을 찾아 실행하는 과정에서 전처리를 하는 부분이였습니다. 그렇기에 여러 인자들이 합쳐서 들어온다면 해당하는 부분을 parsing 하여 순서대로 [calling convention](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI)에 따라 stack에 쌓아 주면 됩니다. 간단히 요약하면 argc와 argv를 접급할 수 있게 intr_frame의 [rsp]([https://casys-kaist.github.io/pintos-kaist/project2/argument_passing.html)에 넣어주면 됩니다.  
+user program이 시작하기전 user stack에 data를 적재하는 과정입니다. 즉 unix에서 파일 실행 명령어를 칠때, file을 찾아 실행하는 과정에서 전처리를 하는 부분이였습니다. 그렇기에 여러 인자들이 합쳐서 들어온다면 해당하는 부분을 parsing 하여 순서대로 [calling convention](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI)에 따라 stack에 쌓아 주면 됩니다. 간단히 요약하면 argc와 argv를 접급할 수 있게 intr_frame의 [rsp](https://casys-kaist.github.io/pintos-kaist/project2/argument_passing.html)에 넣어주면 됩니다.  
 
 그렇기에 ptr배열이나 이중 ptr를 사용해 순차대로 넣어주면 됩니다. 혹여나 힘들어 할 학생을 위해 strtok_r함수 역시 구현되어 있어서 쉽게 할 수 있습니다. 현재 코드를 개선 한다면 반복문 1번으로도 구현할 수 있지만 속도차이는 별로 나지않다고 판단하여 for을 2번 돌면서 각각 data와 ptr그리고 padding을 순차대로 넣었습니다.
 
