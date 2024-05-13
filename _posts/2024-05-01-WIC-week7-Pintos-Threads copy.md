@@ -1,5 +1,5 @@
 ---
-title: /WIC/week7/pintos-threads
+title: WIC week7/pintos-threads
 author: eunsik-kim
 date: 2024-05-01 17:00:00 +0900
 categories: [jungle, WIC]
@@ -24,7 +24,7 @@ advanced scheduler의 [Kaist](https://casys-kaist.github.io/pintos-kaist/project
 
 ### Threads
 
-이번주는 threads에 대해 다뤘습니다. proxy server 과제를 하며 이해했다고 생각했던 threads는 정말 user level의 간단한 부분만을 이해했음을 직접 구현이 되어있는 thread.c code를 보며 알 수 있었습니다. thread join과 같이 많은 부분을 다루지 않았지만 context switching을 assembly로 구현된 부분은 정말 신기했습니다. 하나도 이해가 안되었지만 실제로 asm을 사용한것을 처음보았기에 asm에 대해 공부가 필요함을 다시한번 느낄 수 있었습니다.. (이부분도 교수님께서 추가하신 부분이라고 합니다.)
+이번주는 threads에 대해 다뤘습니다. proxy server 과제를 하며 이해했다고 생각했던 threads는 정말 user level의 간단한 부분만을 이해했음을 직접 구현이 되어있는 thread.c code를 보며 알 수 있었습니다. thread join과 같이 많은 부분을 다루지 않았지만 context switching을 assembly로 구현된 부분은 정말 신기했습니다. 하나도 이해가 안되었지만 실제로 asm을 사용한것을 처음보았기에 asm에 대해 공부가 필요함을 다시한번 느낄 수 있었습니다.
 
 ```
 static void
@@ -54,7 +54,7 @@ thread_launch (struct thread *th) {
 
 #### Alarm-clock
 
-[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/alarm-multiple/devices/timer.c#L90)
+[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/advanced-scheduler/devices/timer.c#L90)
 
 첫번째 과제는 timer-sleep함수내의 `busy-waiting` 방식을 개선하는것입니다. 단순한 방법을 적용하면 해결 할 수 있습니다. 그 과정 속에서 timer.c의 코드와 thread.c의 ready list의 코드를 이해할 수 있기에 좋은 에피타이저였습니다. timer.c는 특히 calibrate함수에서 1초 미만의 시간의 정밀도를 tick으로 계산하는 과정이 인상깊었고 program 내의 시간인 tick을 interrupt로 측량하는 방법도 자세히 이해는 못하였지만 신기하였습니다. 
 
@@ -94,10 +94,10 @@ timer_sleep (int64_t ticks) {
 
 #### Priority scheduling
 
-[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/prioriy-scheduling/threads/synch.c)
+[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/advanced-scheduler/threads/synch.c)
 
 
-> 역시 악명이 높은 pintos 과제를 시작하였음을 알게하는 과제였습니다. 복잡성은 이전의 rb-tree를 고려하면 비슷한 난이도 였지만 직접 thread간의 발생하는 모든 경우를 생각하기엔 너무 많아 어려웠습니다. test code가 없었다면 결코 모든 예외나 상황을 고려하지 못했을것 입니다. (물론 test case에도 없는 예외도 있습니다.) 이 목표를 통해 동기화 과정의 내부 구조를 배울 수 있어서 좋았습니다. (semaphore가 신이다...)
+> 역시 악명이 높은 pintos 과제를 시작하였음을 알게하는 과제였습니다. 복잡성은 이전의 rb-tree를 고려하면 비슷한 난이도 였지만 직접 thread간의 발생하는 모든 경우를 생각하기엔 너무 많아 어려웠습니다. test code가 없었다면 결코 모든 예외나 상황을 고려하지 못했을것 입니다. (물론 test case에도 없는 예외도 있습니다. 그 예외는 해결 못하는 코드이지만 test에 없으므로 개선하진 않았습니다.) 이 목표를 통해 동기화 과정의 내부 구조를 배울 수 있어서 좋았습니다. (semaphore가 신이다...)
 
 `priority scheduling`은 priority가 높은 thread를 가장 먼저 실행하면 되는 간단하고 직관적인 greedy한 방법입니다. 새롭게 ready list에 높은 priority를 가지는 thread가 등장하거나 thread_create를 통해 생성, thread_set_priority 함수를 통해 상승하는 상황에 따라 현재 running thread가 변경됩니다. 그래서 blocked thread가 아닌 ready list만 고려하면 됩니다. 현재 깨어있는 thread가 최강 thread가 되는, 현실에서도 볼수 있는 상황입니다.
 
@@ -168,7 +168,6 @@ donor_thread_func (void *locks_)
 | priority_donation | 재귀적으로 우선순위를 해제할 lock을 가진 대상에게 전달 |
 | thread_reschedule | donation 후 thread를 list에서 위치를 재정렬하는 함수|
 | donation_withdraw | 자기가 기부한 donation을 회수하는 함수 |
-| print_list        | debugging용 list traverse하며 thread info 출력 함수(사용 주의) |
 
 크게 4가지의 함수를 통해 우선순위 정렬, 우선순위 기부, 우선순위 회수를 구현할 수 있었습니다. test case를 고려하여 필수 정보를 저장하였고 donation과 withdraw 함수에서 사용하였습니다.
 
@@ -229,8 +228,6 @@ void priority_donation(struct lock *lock, struct thread *donator)
 #### Advanced Scheduler
 
 [완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/advanced-scheduler/threads/thread.c)
-
-> 권영진 교수님께서 친절하게 설명서를 적어주신 덕분에 부동소수점 macro와 priority 수식을 쉽게 이해함과 동시에 구현을 할 수 있었습니다. (감사합니다!!) 이름은 더어려워 보이지만 priority scheduler보다 간결하다고 생각됩니다.
 
 Scheduler의 종류중 하나인 MLFQ(multi level feedback queue)에 대해 구현을 하는 과제입니다. 수식 계산으로 우선순위를 조절하기 때문에 간단하게 구현을 할 수 있고 우선순위 scheduler와 비교를 하면 starvation과 response time의 문제점을 개선한 방법론입니다.
 크게 3가지 공식을 구현을 목표로 합니다.
@@ -318,4 +315,5 @@ void mlfq_scheduler(struct thread *t)
 
 #### summary
 
-timer sleep,  thread의 문맥 전환, lock 작동원리, thread scheduling의 과정을 직접 구현하며 debugging을 해봤습니다. OS입장에서 system을 관리하는것이 굉장한 어려움이 존재한다는 사실을 깨달을 수 있었습니다. interrupt와 assembly에 대한 추가 공부를 통해 다음 project에 더 깊이 있는 코드를 작성하도록 준비해야겠습니다.
+timer sleep, lock 작동원리, thread scheduling의 과정을 직접 구현하였고 debugging을 해봤습니다. scheduling전략은 경우의 수가 굉장히 많아 구현이 어렵다는 사실을 깨달을 수 있었습니다. interrupt와 assembly에 대한 추가 공부를 통해 다음 project에 더 깊이 있는 코드를 작성하도록 준비해야겠습니다.
+
