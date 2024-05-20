@@ -156,7 +156,7 @@ os에 대한 이해 없이, userprog에 작동과정에 대한 이해 없이, �
 
 #### Argument Passing
 
-[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall/userprog/process.c#L194) (팀원분이 작성해주셨습니다.)
+[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/process.c#L194) (팀원분이 작성해주셨습니다.)
 
 user program이 시작하기전 user stack에 data를 적재하는 과정입니다. 즉 unix에서 파일 실행 명령어를 칠때, file을 찾아 실행하는 과정에서 전처리를 하는 부분이였습니다. 그렇기에 여러 인자들이 합쳐서 들어온다면 해당하는 부분을 parsing 하여 순서대로 [calling convention](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI)에 따라 stack에 쌓아 주면 됩니다. 간단히 요약하면 argc와 argv를 접급할 수 있게 intr_frame의 [rsp](https://casys-kaist.github.io/pintos-kaist/project2/argument_passing.html)에 넣어주면 됩니다.  
 
@@ -168,7 +168,7 @@ user program이 시작하기전 user stack에 data를 적재하는 과정입니�
 
 #### System calls
 
-[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall/userprog/syscall.c) 
+[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/syscall.c) 
 
 사실상 system call 구현이 argument passing을 제외한 2project 전부를 포함하는 내용이라고 생각합니다. 위에서 얘기하였듯이 여러.c 파일을 보고 해당하는 함수를 사용한다면 의외로 간단하게 구현 할 수 있게끔 되어 있었습니다. (wait과 fork를 제외하고)   
 
@@ -238,7 +238,7 @@ struct fpage {
 | exec    	| file name을 parsing하여 해당 code를 적재한 intr_frame, pml4를 만들고 해당 process로 변경 |
 | wait      | fork한 pid를 대기 fork한 process의 exit의 status return |
 
-[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall/userprog/process.c) 
+[완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/process.c) 
 
 위의 함수를 구현하며 process.c의 duplicate_pte, __do_fork fork를 추가적으로 구현하였습니다. fork exec그리고 wait를 구현하면서 page_fault exception을 너무 많이 겪어 debugging할 때 힘들었습니다. 기본적인 TODO들이 process.c에 지시되어 있었습니다. 하지만 syscall 호출 시 current tf에 저장이 안되는 현상 즉 syscall-entry.S를 이해하지 못하여 발생하는 상황 때문에 어려웠습니다. 
 
@@ -250,7 +250,7 @@ struct fpage {
 
 
 > pml4 는 paging 기법 중 하나입니다. 현재 pintos에서는 4단계 table로 구현되어 있으며 각 table은 512개의 entry를 가지며 각 entry가 virtual address의 index에 해당합니다. 마지막 table안에 physical address가 존재합니다. 제가 겪었던 문제중 하나는 va를 습관적으로 false로 return 했습니다.  
-[va가 kerenl addr인지 판별하는 구문](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall/userprog/process.c#L103)에서 true를 return해야 합니다. 이 이유 역시 base pml4생성 원리에 대해 이해가 필요합니다. init.c에서 모든 pml4의 기초가 되는 base_pml4를 먼저 생성하고 이후 pml4 create할 때 base_pml4를 복사하여 생성합니다.  
+[va가 kerenl addr인지 판별하는 구문](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/process.c#L103)에서 true를 return해야 합니다. 이 이유 역시 base pml4생성 원리에 대해 이해가 필요합니다. init.c에서 모든 pml4의 기초가 되는 base_pml4를 먼저 생성하고 이후 pml4 create할 때 base_pml4를 복사하여 생성합니다.  
 이렇게 하는 이유는 바로 base_pml4에 kernel영역에 접근하는 table정보가 포함되어 있기 때문입니다. 즉 모든 thread는 kernel영역에 접근 가능해야하고 그렇기에 생성할때마다 복사를하며 따라서 duplicate_pte에서 불필요하게 또 복사를 할 필요가 없습니다. 그래서 true로 return해야 합니다.
 {: .prompt-info }
 
