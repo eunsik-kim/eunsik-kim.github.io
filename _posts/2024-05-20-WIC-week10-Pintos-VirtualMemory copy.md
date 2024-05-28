@@ -12,7 +12,7 @@ render_with_liquid: false
 
 ### last week review
 
-1, 2주를 지나 새팀에 오게되면서 저의 코드를 받아 이어쓰게 되었습니다. 다음 팀원에게 설명하다 보니, 버그에 대한 걱정도 있었고 이전에 작성한 삽입, 삭제 코드가 복잡하게 느껴져 refactoring 과정을 거쳤습니다.   
+1, 2 project를 지나 새팀에 오게되면서 저의 코드를 받아 이어쓰게 되었습니다. 다음 팀원에게 설명하다 보니, 버그에 대한 걱정도 있었고 이전에 작성한 삽입, 삭제 코드가 복잡하게 느껴져 refactoring 과정을 거쳤습니다.   
 
 [이전 코드](https://github.com/eunsik-kim/pintos11/commit/4005e550aea145ea87f58cdc649f3838f4fb009b)
 
@@ -112,7 +112,7 @@ rehash (struct hash *h) {
 
 [완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/vm/vm/vm.c#L97)
 
-hash 자료구조를 활용하여 spt(supplemental_page_table)와 fbt(frame_table)를 구현하였습니다. 그리고 삽입과 삭제하는 부분을 TODO에 명시된 대로 넣으면 되었습니다. 근데 이게 lock을 매번적는게 귀찮아서 hash.c 파일을 수정하여 넣어 버렸습니다. (filesys 파일도 그렇게 수정할껄 그랬습니다.) 그렇게 하니 그냥 syscall에서 작성하는것 처럼 그냥 적절한 위치에 구현된 적절한 함수를 넣으면 되는 부분이라 쉽게 할 수 있습니다. 하지만 이함수를 언제 사용하는지 아직 모르기 때문에 예외처리를 어떻게 해야될지 몰라 감을 잡기가 어려웠습니다.
+hash 자료구조를 활용하여 spt(supplemental_page_table)와 fbt(frame_table)를 구현하였습니다. 그리고 삽입과 삭제하는 부분을 TODO에 명시된 대로 넣으면 되었습니다. 근데 이게 lock을 매번적는게 귀찮아서 hash.c 파일을 수정하여 넣어 버렸습니다. (filesys 파일도 그렇게 수정할걸 그랬습니다.) 그렇게 하니 그냥 syscall에서 작성하는것 처럼 그냥 적절한 위치에 구현된 적절한 함수를 넣으면 되는 부분이라 쉽게 할 수 있습니다. 하지만 이함수를 언제 사용하는지 아직 모르기 때문에 예외처리를 어떻게 해야될지 몰라 감을 잡기가 어려웠습니다.
 
 
 #### Anonymous Page & Memory Mapped Files
@@ -302,15 +302,27 @@ swap-out&swap-in을 구현하지 못하였음에도 상당히 깁니다. 이유�
 
 #### etc
 
-parallel test를 통해 여러 임계영역에서 shared data로 인한 문제가 많이 발생함을 알 수 있었습니다. 그래서 cpwrt할 때 lock을 걸었고 1주차에 작성한 donation시에 for문 안에 예외처리를 추가하였습니다. 아직은 error가 눈에 보이지 않지만 이외에도 여러 에러가 발생할 수 있습니다. 특히 pml4 destroy 할때 발생하는 에러를 막기 위해 pml4_clear_page를 적절한 위치에 해줘야 되는것이 까다로웠습니다.
-그리고 disk write를 실행파일에 잘못 하는 경우 exec한뒤 함수를 실행못하고 갑자기 죽는 에러도 있었는데 지금생각하면 어떻게 해결했는지 신기합니다.
+parallel test를 통해 여러 임계영역에서 shared data로 인한 문제가 많이 발생함을 알 수 있었습니다. 그래서 cpwrt할 때 lock을 걸었고 1주차에 작성한 donation시에 for문 안에 예외처리를 추가하였습니다. 아직은 error가 눈에 보이지 않지만 이외에도 여러 에러가 발생할 수 있습니다.   
+
+특히 pml4 destroy 할때 발생하는 에러를 막기 위해 pml4_clear_page를 적절한 위치에 해줘야 되는것이 까다로웠습니다.  
+
+그리고 disk write를 실행파일에 잘못 하는 경우 exec한뒤 함수를 실행못하고 갑자기 죽는 에러도 있었는데 지금생각하면 어떻게 해결했는지 신기합니다.  
 
 ### Summary
 
-아직도 코드 설계실력이 많이 부족한것 같습니다. 작성한 함수가 독립성을 지키는지 기능에 맞게 구현 했는지 확실치 못하는것 같습니다. 저번에 배운대로 mechanism과 policy의 차이와 layer astraction을 고려하여 구현하고 싶었지만 시간 관계상 구체적으로 설계를 하지 못하고 구현하였습니다. 추 후 1. swap-in, out을 마저 구현하고 2. lazy load data를 중복 참조 3. BSS data를 VM_ANON으로 초기화 하도록 코드를 개선해야 겠습니다. (글을 정리하고 보니 문제가 되는것 같습니다.) 그리고 빨리 file system을 가능한곳 까지 하도록 정말 최선을 다해야 겠습니다.
+아직도 코드 설계실력이 많이 부족한것 같습니다. 작성한 함수가 독립성을 지키는지 기능에 맞게 구현 했는지 확실치 못하는것 같습니다.   
+
+저번에 배운대로 mechanism과 policy의 차이와 layer astraction을 고려하여 구현하고 싶었지만 시간 관계상 구체적으로 설계를 하지 못하고 구현하였습니다.   
+
+추 후 1. swap-in, out을 마저 구현하고 2. lazy load data를 중복 참조 3. BSS data를 VM_ANON으로 초기화 하도록 코드를 개선해야 겠습니다. (글을 정리하고 보니 문제가 되는것 같습니다.) 그리고 빨리 file system을 가능한곳 까지 구현 하도록 정말 최선을 다해야 겠습니다.
 
 process간의 isolation을 지키며 하나의 computer를 사용하도록 illusion을 주는 VA를 설계하는것이 굉장히 어려움을 알 수 있습니다.  
 
 VA와 더불어 메모리를 효율적으로 사용하기 위해 spt나 ftb를 유지하는 overhead를 줄이도록 고민을 많이하게 되었습니다.  
 
 이번 프로젝트를 하면서 구현된 hash에 대한 사용방법을 알 수 있어서 좋았습니다. 추가적으로 bitmap 사용방법에 대해서도 알고 싶다고 느껴졌습니다.  
+
+
+[palloc 발표자료](https://docs.google.com/presentation/d/13LtASbmnk7oyyRr1147jOyGWciSPvu0qsPH-hVNFxdE/edit?usp=sharing)
+
+

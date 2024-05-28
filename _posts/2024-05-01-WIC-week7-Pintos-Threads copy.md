@@ -311,9 +311,17 @@ void mlfq_scheduler(struct thread *t)
 }
 ```
 {: file='threads/thread.c'}
-시간을 줄이기 위해 ch_prior list에 recent_cpu 값이 변경된 thread만 계산하는 방법을 도입했습니다. 하지만 알 수 없는 list삽입을 시도할 때 알수없는 interrupt로 인해 무작위로 실패하는 현상을 확인했습니다. 이후 thread_list를 탐색해 값을 갱신해주는 방식으로 변경한뒤 다시 통과하였습니다. 시간복잡도 측면에서 더 빠르다고 생각한 방법이 함수의 stack을 쌓는 overhead에 의해 실패할 수 있으니 주의하시기 바랍니다.
+시간을 줄이기 위해 ch_prior list에 recent_cpu 값이 변경된 thread만 계산하는 방법을 도입했습니다. 하지만 알 수 없는 list삽입을 시도할 때 알수없는 interrupt로 인해 무작위로 실패하는 현상을 확인했습니다.   
+
+이후 thread_list를 탐색해 값을 갱신해주는 방식으로 변경한뒤 다시 통과하였습니다. 시간복잡도 측면에서 더 빠르다고 생각한 방법이 함수의 stack을 쌓는 overhead에 의해 실패할 수 있으니 주의하시기 바랍니다.
 
 #### summary
 
-timer sleep, lock 작동원리, thread scheduling의 과정을 직접 구현하였고 debugging을 해봤습니다. scheduling전략은 경우의 수가 굉장히 많아 구현이 어렵다는 사실을 깨달을 수 있었습니다. interrupt와 assembly에 대한 추가 공부를 통해 다음 project에 더 깊이 있는 코드를 작성하도록 준비해야겠습니다.
+timer sleep, lock 작동원리, thread scheduling의 과정을 직접 구현하였고 debugging을 해봤습니다.   
+
+scheduling전략은 경우의 수가 굉장히 많아 구현이 어렵다는 사실을 깨달을 수 있었습니다.   
+
+저의 donation 방법이 구리다는 사실을 인정하고, 팀원의 코드를 사용하기로 채택하였습니다.  
+
+interrupt와 assembly에 대한 추가 공부를 통해 다음 project에 더 깊이 있는 코드를 작성하도록 준비해야겠습니다.
 

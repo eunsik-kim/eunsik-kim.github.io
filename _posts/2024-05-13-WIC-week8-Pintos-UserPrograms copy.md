@@ -164,7 +164,9 @@ user program이 시작하기전 user stack에 data를 적재하는 과정입니�
 
 #### User Memory
 
-2주차 과제를 하며 가장 어려웠던 순간이였습니다. 어떤걸 지시하는지 이해할 수는 있었지만 무엇을 해야될지 이해를 할 수가 없었습니다. 근본적인 원인은 pinots에서 userprog를 실행하는 원리를 이해하지 못했기 때문이었습니다. 특히 syscall이 호출되는 syscall-entry.S에 대해 알지 못하였고 virtual address에 대해 몰랐기에 다른 블로그를 참조하여 정답을 보고 이해를 할 수 있었습니다. syscall에서 호출될 때 허용되지 않는 ptr인지 판단하는 함수인 check_address를 작성하여 추후 syscall 구현시 사용하면 됩니다.
+2주차 과제를 하며 가장 어려웠던 순간이였습니다. 어떤걸 지시하는지 이해할 수는 있었지만 무엇을 해야될지 이해를 할 수가 없었습니다. 근본적인 원인은 pintos에서 userprog를 실행하는 원리를 이해하지 못했기 때문이었습니다. 특히 syscall이 호출되는 syscall-entry.S에 대해 알지 못하였고 virtual address에 대해 몰랐기에 다른 블로그를 참조하여 정답을 보고 이해를 할 수 있었습니다.   
+
+사실 정답은 단순하였습니다. syscall에서 호출될 때 허용되지 않는 ptr인지 판단하는 함수인 check_address를 작성하여 추후 syscall 구현시 사용하면 됩니다. 그래서 무엇을 해야될지 모르는게 자연스러웠습니다.
 
 #### System calls
 
@@ -172,7 +174,9 @@ user program이 시작하기전 user stack에 data를 적재하는 과정입니�
 
 사실상 system call 구현이 argument passing을 제외한 2project 전부를 포함하는 내용이라고 생각합니다. 위에서 얘기하였듯이 여러.c 파일을 보고 해당하는 함수를 사용한다면 의외로 간단하게 구현 할 수 있게끔 되어 있었습니다. (wait과 fork를 제외하고)   
 
-이외에 고려해야 될 부분은 fdt의 정보를 저장하기 위한 자료구조 선택이였습니다. 처음엔 list_elem을 관리 하기 위해 page를 전체를 할당받는 줄 알고 메모리 내부 단편화 때문에 선택하지 않았습니다. (하지만 malloc구현을 나중에 보니 free block(16 byte씩)을 저장하여 slicing해서 주기에 단편화는 거의 없었습니다. 더구나 array에 비해 메모리 leak관리에서 훨신 유리할것이라 생각이 됩니다.) list보단 속도와 메모리 관리가 쉽다고 판단하여 page에 array를 적재하여 사용하기로 생각했습니다.
+이외에 고려해야 될 부분은 fdt의 정보를 저장하기 위한 자료구조 선택이였습니다. 처음엔 list_elem을 관리 하기 위해 page를 전체를 할당받는 줄 알고 메모리 내부 단편화 때문에 선택하지 않았습니다. list보단 속도와 메모리 관리가 쉽다고 판단하여 page에 array를 적재하여 사용하기로 생각했습니다.
+
+> 하지만 malloc구현을 나중에 보니 free block(16 byte씩)을 저장하여 slicing해서 주기에 단편화는 거의 없었습니다. 더구나 array에 비해 메모리 leak관리에서 훨신 유리할것이라 생각이 됩니다.
 
 | fucntion  | summary             
 | :---------| :-------------------------------: |
@@ -189,9 +193,11 @@ user program이 시작하기전 user stack에 data를 적재하는 과정입니�
 | close  	| fd에 해당하는 file를 close, file_entry를 NULL로 초기화 |
 | dup2  	| newfd가 가리키는 file을 닫고 oldfd의 fety을 newfd의 fety가 가리키도록 바꿈 |
 
-fork와 exec, wait을 제외하고 filesys.c를 참고하여 나머지 call을 먼저 구현하였습니다. file 제어 함수는 다 구현이 되어 있어서 위에서 말한 header file issue를 제외하고 쉽게 할 수 있었습니다. 하지만 결함이 존해 하였는데 write stderr같이 제공된 함수가 없는 경우가 해당 됩니다. (test에 해당하지 않아서 따로 구현하지 않았습니다.)   
+fork와 exec, wait을 제외하고 filesys.c를 참고하여 나머지 call을 먼저 구현하였습니다. file 제어 함수는 다 구현이 되어 있어서 위에서 말한 header file issue를 제외하고 쉽게 할 수 있었습니다. 하지만 결함이 존해 하였는데 write stderr같이 제공된 함수가 없는 경우가 해당 됩니다. (test에 해당하지 않아서 따로 구현(할 줄 몰라서)하지 않았습니다.)   
 
-test갯수가 많은 만큼 평가가 몇몇 test를 제외하곤 scheduler test만큼 어렵지 않았습니다. 그래서 기본적인 부분을 동일하게 구현하면 여러 test를 한번에 통과할 수 있었습니다. 다만 까다로운 부분은 역시 fdt였습니다. fd에 대해 이해가 부족하여 file entry를 구현해야될지 말아야 될지 여러번 번복하였습니다. (나중에 dup2를 위해 다시 구현하긴 하였지만) 제가 구현한 방식은 실제 linux system call과 pintos가 평가하는 system call은 약간의 차이가 있다고 생각이 됩니다. 
+test갯수가 많은 만큼 평가가 몇몇 test를 제외하곤 scheduler test만큼 어렵지 않았습니다. 그래서 기본적인 부분을 동일하게 구현하면 여러 test를 한번에 통과할 수 있었습니다.   
+
+다만 까다로운 부분은 역시 fdt였습니다. fd에 대해 이해가 부족하여 file entry를 구현해야될지 말아야 될지 여러번 번복하였습니다. (나중에 dup2를 위해 다시 구현하긴 하였지만) 제가 구현한 방식은 실제 linux system call과 pintos가 평가하는 system call은 약간의 차이가 있다고 생각이 됩니다. 
 
 
 | fucntion               | summary             
@@ -203,7 +209,11 @@ test갯수가 많은 만큼 평가가 몇몇 test를 제외하곤 scheduler test
 
 처음엔 open갯수를 제한하여 구현을 많이 하였지만 (test에 문제없이 통과됩니다.) 실제로는 무제한으로 메모리를 증가시키는것이 맞다고 생각되어 page list를 통해 open된 file ptr을 저장하였습니다. 즉 fdt_list (file discripter table)과 fet_list(file entry table)을 통해 데이터를 저장하고 필요시 page를 추가로 할당받도록 구현하였습니다. page에 특정 offset부터 접근하여 탐색시 약간의 속도를 높이도록 설정하였습니다.  
 
-제가 선택한 자료구조에서도 문제가 존재하였습니다. 바로 가장 낮은 fd값을 찾기 위해서는 O(n)만큼 소모해야 합니다. (물론 offset으로 접근하더라도 page를 search하는 시간이 최악의 경우 O(n)입니다.) 그렇기에 속도를 위해 dup2호출을 제외하고 open시에는 index에 해당하는 fd를 사용하도록 편법을 사용하였습니다. 어떻게 해야 효과적으로 fd를 찾을 수 있을지는 추가적인 고민이 필요한것 같습니다. 그리고 open과 close에서 사용되는 page의 값을 변경하기 위한 함수와, 그 외 나머지 함수에서 사용하는 file을 찾는 함수를 만들어 사용하였습니다.
+> 특정 offset이라 함은 file 삭제와 삽입시 탐색 시작 위치와 종료 위치를 기억해뒀다가 다시 사용하는 방법입니다.
+
+제가 선택한 자료구조에서도 문제가 존재하였습니다. 바로 가장 낮은 fd값을 찾기 위해서는 O(n)만큼 소모해야 합니다. (물론 offset으로 접근하더라도 page를 search하는 시간이 최악의 경우 O(n)입니다.) 그렇기에 속도를 위해 dup2호출을 제외하고 open시에는 index에 해당하는 fd를 사용하도록 편법을 사용하였습니다.  
+
+어떻게 해야 효과적으로 fd를 찾을 수 있을지는 추가적인 고민이 필요한것 같습니다. 그리고 open과 close에서 사용되는 page의 값을 변경하기 위한 함수와, 그 외 나머지 함수에서 사용하는 file을 찾는 함수를 만들어 사용하였습니다.
 
 ```
 struct fdt 
@@ -240,23 +250,21 @@ struct fpage {
 
 [완성본](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/process.c) 
 
-위의 함수를 구현하며 process.c의 duplicate_pte, __do_fork fork를 추가적으로 구현하였습니다. fork exec그리고 wait를 구현하면서 page_fault exception을 너무 많이 겪어 debugging할 때 힘들었습니다. 기본적인 TODO들이 process.c에 지시되어 있었습니다. 하지만 syscall 호출 시 current tf에 저장이 안되는 현상 즉 syscall-entry.S를 이해하지 못하여 발생하는 상황 때문에 어려웠습니다. 
+위의 함수를 구현하며 process.c의 duplicate_pte, __do_fork fork를 추가적으로 구현하였습니다. fork exec 그리고 wait를 구현하면서 page_fault exception을 너무 많이 겪어 debugging할 때 힘들었습니다. 기본적인 TODO들이 process.c에 지시되어 있었습니다. 하지만 syscall 호출 시 current tf에 저장이 안되는 현상 즉 syscall-entry.S를 이해하지 못하여 발생하는 상황 때문에 어려웠습니다. 
 
-> 새로운 tf를 만들어 syscall의 인자인 f, intr_frame을 저장해야 합니다. 왜냐하면 syscall 함수를 호출하는 thread의 tf는 kernel영역에 호출되며 접근한 새로운 register값이 들어 있습니다. 그렇기에 timer interrupt와 같은 다른 interrupt 발생시 사용되므로 기존의 tf를 저장공간으로 사용하면 안됩니다.  
-추가적으로 과제 설명서엔 You don't need to clone the value of the registers except %RBX, %RSP, %RBP, and %R12 - %R15 라고 적혀있지만 register 전부를 복사하지 않으면 page fault 에러가 발생합니다. 여러번 반복하지 않고선 복사를 해야되는 필수 register를 찾지 못하였기에 일괄로 전부 복사하였습니다.    
+> 과제 설명서엔 You don't need to clone the value of the registers except %RBX, %RSP, %RBP, and %R12 - %R15 라고 적혀있지만 register 전부를 복사하지 않으면 page fault 에러가 발생합니다. 저는 복사를 해야되는 필수 register를 찾지 못하였기에 일괄로 전부 복사하였습니다.    
 {: .prompt-warning }
 
-그리고 pml4의 작동원리를 이해하지 못하여서 duplicate_pte를 작성하는데 많은 에러를 겪었습니다. pml4는 [다음블로그](https://sean.tistory.com/146#google_vignette)에서 많은 정보를 얻었습니다. 현재 pintos의 구현과 다른것 같지만 잘 정리가 되어 있습니다. 
+그리고 pml4의 작동원리를 이해하지 못하여서 duplicate_pte를 작성하는데 많은 에러를 겪었습니다. ([va가 kerenl addr인지 판별하는 구문](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/process.c#L103)에서 true를 return해야 되지만 va를 습관적으로 false로 return 해버렸습니다.) pml4는 [다음블로그](https://sean.tistory.com/146#google_vignette)에서 많은 정보를 얻었습니다. 현재 pintos의 구현과 다른것 같지만 잘 정리가 되어 있습니다. 
 
+1. pml4 는 paging 기법 중 하나입니다. 현재 pintos에서는 4단계 table로 구현되어 있습니다.
+2. 각 table은 512개의 entry를 가지며 각 entry가 virtual address의 index에 해당합니다. 마지막 table안에 physical address가 존재합니다. 
+3. pintos에서는 추가로 init.c에서 모든 pml4의 기초가 되는 base_pml4를 먼저 생성하고 이후 pml4 create할 때 base_pml4를 복사하여 생성합니다. 이는 base_pml4에는 kernel영역에 접근하는 첫번째 index갑이 존재하는 page입니다.
+4. 즉 모든 thread는 kernel영역에 접근 가능해야하고 그렇기에 생성할때마다 복사를하며 따라서 제가 틀린부분(duplicate_pte)에서 true를 return 해야합니다. (한번 더 복사할 필요 없음)
 
-> pml4 는 paging 기법 중 하나입니다. 현재 pintos에서는 4단계 table로 구현되어 있으며 각 table은 512개의 entry를 가지며 각 entry가 virtual address의 index에 해당합니다. 마지막 table안에 physical address가 존재합니다. 제가 겪었던 문제중 하나는 va를 습관적으로 false로 return 했습니다.  
-[va가 kerenl addr인지 판별하는 구문](https://github.com/eunsik-kim/pintos11/blob/eunsik/syscall_extra/userprog/process.c#L103)에서 true를 return해야 합니다. 이 이유 역시 base pml4생성 원리에 대해 이해가 필요합니다. init.c에서 모든 pml4의 기초가 되는 base_pml4를 먼저 생성하고 이후 pml4 create할 때 base_pml4를 복사하여 생성합니다.  
-이렇게 하는 이유는 바로 base_pml4에 kernel영역에 접근하는 table정보가 포함되어 있기 때문입니다. 즉 모든 thread는 kernel영역에 접근 가능해야하고 그렇기에 생성할때마다 복사를하며 따라서 duplicate_pte에서 불필요하게 또 복사를 할 필요가 없습니다. 그래서 true로 return해야 합니다.
-{: .prompt-info }
+fork를 하면서 parent는 child가 온전히 do_fork를 수행하였는지 확인해야 합니다. 그렇기에 signal 대신에 sema 한개가 필수적으로 사용됩니다. 이외에 wait을 할 때, parent나 child는 exit status를 전달하기 위해 서로를 기다립니다. 이 부분에선 sema는 최소 2개가 필요합니다.  
 
-fork를 하면서 parent는 child가 온전히 do_fork를 수행하였는지 확인해야 합니다. 그렇기에 signal 대용으로 sema를 한가지가 필수적으로 사용됩니다. 이외에 wait을 하며 parent나 child는 exit status를 전달하기 위해 서로를 기다리게 됩니다. 그렇기에 sema가 최소 2가지는 필요합니다.  
-
-그리고 exit_status를 전달 받기 위해 child_elem을 parent_list에 저장하여 전달 받도록 하였습니다. sema를 잘못사용하거나 실패시 예외 처리를 잘못하면 zombie process가 생성되어 oom test를 통과하기 위해 불가피한 코드를 삽입해야할 수 있습니다. (parent가 죽기전 child를 깨우는 `전설의 코드`를 삽입하면 대부분 memory leak를 해결 할 수 있습니다.)   
+그리고 exit_status를 전달 받기 위해 child_elem을 parent_list에 저장하여 전달 받도록 하였습니다. sema를 잘못사용하거나 실패시 예외 처리를 잘못하면 zombie process가 생성되어 oom test를 통과하기 위해 불가피한 코드를 삽입해야할 수 있습니다. (팀원분들은 parent가 죽기전 child를 깨우는 `전설의 코드`를 삽입하면 대부분 memory leak를 해결 할 수 있었지만 불필요하다고 생각이 됩니다.)   
  
 추가적으로 memory leak이나 에러를 겪었던 부분들입니다.
 1. _do_fork 실패시 TID_ERROR 반환하며 sema down되면 안됩니다.
@@ -271,7 +279,8 @@ fork를 하면서 parent는 child가 온전히 do_fork를 수행하였는지 확
 | process_duplicate_fdt   | fdt와 관련된 fdt_list와 fet_list안의 page들과 file들을 자식에게 cpy  |
 | process_delete_fdt      |  fdt와 관련된 fdt_list와 fet_list안의 page들과 file들을 free |
 
-마지막으로 fdt table을 유지하기 위해 3가지 함수를 만들어 사용했습니다. 특히 process_duplicate_fdt는 약간 dirty하게 작성할 수 밖에 없었습니다... 
+마지막으로 fdt table을 유지하기 위해 3가지 함수를 만들어 사용했습니다. 특히 process_duplicate_fdt는 약간 dirty하지만 n개를 전부 복사하려면 어쩔수 없었습니다... 
+
 1. fet와 fdt모두 page단위로 memcpy를 하였습니다. 
 2. new fdt에서 fet ptr는 예전 parent의것과는 다른 새로운 ptr를 할당해야 합니다. fet page에서 old page와 new page간의 차이를 찾아 page_dff에 저장합니다.
 3. new fdt를 순회하며 이전 fet page의 page_dff를 보고 새롭게 초기화 합니다.
@@ -281,14 +290,18 @@ fork를 하면서 parent는 child가 온전히 do_fork를 수행하였는지 확
 
 #### etc..
 
-rox는 load할 때 file_close를 안하고 thread_exit할 때 해결 할 수 있습니다. bad-*** 류의 test는 page fault 발생시 intr_frame의 rax값을 조회함으로 한번에 모두 해결 할 수 있었습니다.  disasm을 통해 알아내었는데 rax를 주로 값을 저장하는 reg로 사용하는 이유는 잘 모르겠습니다.
+rox는 load할 때 file_close를 안하고 thread_exit할 때 해결 할 수 있습니다. bad-*** 류의 test는 page fault 발생시 intr_frame의 rax값을 조회함으로 한번에 모두 해결 할 수 있었습니다.  disasm을 통해 알아내었는데 rax를 주로 값을 저장하는 register로 사용하는 이유는 잘 모르겠습니다.
 
 ### summary
 
-다양한 syscall을 구현하므로 실제로 사용자의 입장이 아닌 제작자의 입장에서 함수내부를 고민해볼 수 있는 시간이였습니다. 그러기 위해 새로운 library 사용법을 익힌다는 마음가짐으로 syscall를 구현하기 위해 다양한 함수들의 구성들을 알아보고 사용할 수 있어서 좋았습니다. 깊게 들어가보면 pintos의 세계의 끝에는 전부 asm으로 구성되어 있어서 system 개발을 위해선 더욱이 asm을 배울 필요가 있다는 생각을 하게 되었습니다.   
+다양한 syscall을 구현하므로 실제로 사용자의 입장이 아닌 제작자의 입장에서 함수내부를 고민해볼 수 있는 시간이였습니다. 그러기 위해 새로운 library 사용법을 익힌다는 마음가짐으로 syscall를 구현하기 위해 다양한 함수들의 구성들을 알아보고 사용할 수 있어서 좋았습니다.   
+
+깊게 들어가보면 pintos의 세계의 끝에는 전부 asm으로 구성되어 있어서 system 개발을 위해선 더욱이 asm을 배울 필요가 있다는 생각을 하게 되었습니다.   
 
 다양한 test덕분에 예외처리의 중요성에 대해 깨달을 수 있었습니다. 특히 oom test를 통과 하기 위해 memory관리를 효율적으로 하기 위해 고민을 많이 했어야 했습니다.  
 
 이전 project에서 와 동일한 실수를 범하지 않게 하기 위해 충분한 고민을 통해 fdt를 유지하도록 자료구조를 선택하였습니다. 여러번 엎었지만 그래도 괜찮은 성능을 보여 만족스럽다고 생각이 됩니다.  
  
 앞으로 3주차 프로젝트에선 권영진교수님께서 해주신 강의 내용 중 mechanism과 policy의 차이와 layer astraction을 고려한 코드를 작성할 수 있도록 노력해야될것 같습니다.  
+
+[disk 발표 자료](https://docs.google.com/presentation/d/13VVCnRquPySW4SSA34tnzuBQKqWJspWuVdaE-25xxvw/edit#slide=id.p)
